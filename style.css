@@ -1,0 +1,11 @@
+body{
+	margin-top: 2em;
+	text-align: center;
+}
+.gridof4{
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	width: 33%;
+	height: 50%
+	
+}
