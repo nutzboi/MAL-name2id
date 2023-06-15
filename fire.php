@@ -4,7 +4,7 @@ use Google\Cloud\Firestore\FirestoreClient;
 /**
  * Initialize Cloud Firestore with default project ID.
  */
-function setup_client_create(string $projectId = null)
+function setup_client_create(string $projectId = "MAL-User2ID")
 {
     // Create the Cloud Firestore client
     if (empty($projectId)) {
@@ -20,5 +20,4 @@ function setup_client_create(string $projectId = null)
         printf('Created Cloud Firestore client with project ID: %s' . PHP_EOL, $projectId);
     }
 }
-
 ?>
