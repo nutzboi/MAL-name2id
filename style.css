@@ -9,3 +9,8 @@ body{
 	height: 50%
 	
 }
+
+.table{
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+}

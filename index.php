@@ -18,6 +18,24 @@
 <p id="down">
     
 <?php
+
+require_once "vendor/autoload.php";
+require "fire.php";
+
+use Firestore;
+$db = new Firestore(); 
+
+function print_table($doc){
+    echo "<div></div>";
+    for($i = 0; $i < count($doc["username"]); $i++){
+        echo "<div class=\"table\"><p>Username</p><p>First Seen</p><p>Last Seen</p>";
+        echo "<p>" . $doc["username"][$i] . "</p>" .
+        "<p>" . date("Y-m-d",$doc["first_date"][$i]) . "</p>" .
+        "<p>" . date("Y-m-d",$doc["last_date"][$i]) . "</p>";
+    }
+    echo "</div><br><div></div><p><i>All dates are expressed in ISO 8601 <b>(YYYY-MM-DD)</b> format.</p>";
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $down = 0;
     if(isset($_POST["getID"])){
@@ -40,6 +58,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $endpos = strpos($response, "\"", $startpos);
                 $id = substr($response,$startpos+70,$endpos-$startpos-70);
                 echo "<b><i>" . $username . "</i></b>'s ID is " . $id . ".";
+                $db->push($id,$username);
+                $doc = $db->pull($id);
+                print_table($doc);
             }
             else{
                 echo "MAL is down.";
@@ -78,6 +99,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 					$endpos = strpos($response, " ", $startpos+17);
 					$username = substr($response,$startpos+17,$endpos-$startpos-17);
 					echo "The user ID <i>" . $id . "</i> belongs to <b>" . $username . "</i></b>";
+                    $db->push($id,$username);
+                    $doc = $db->pull($id);
+                    print_table($doc);
 				}
 			}
             else{

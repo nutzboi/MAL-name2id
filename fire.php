@@ -1,23 +1,48 @@
 <?php
 use Google\Cloud\Firestore\FirestoreClient;
+use Google\Cloud\Firestore\FieldValue;
 
-/**
- * Initialize Cloud Firestore with default project ID.
- */
-function setup_client_create(string $projectId = "MAL-User2ID")
+class Firestore
 {
-    // Create the Cloud Firestore client
-    if (empty($projectId)) {
-        // The `projectId` parameter is optional and represents which project the
-        // client will act on behalf of. If not supplied, the client falls back to
-        // the default project inferred from the environment.
-        $db = new FirestoreClient();
-        printf('Created Cloud Firestore client with default project ID.' . PHP_EOL);
-    } else {
-        $db = new FirestoreClient([
-            'projectId' => $projectId,
+    private FirestoreClient $firestore;
+
+    public function __construct(){
+        $this->firestore = new FirestoreClient([
+            "keyFilePath" => "mal-user2id-88800c3331e7.json",
+            "projectId" => "mal-user2id"
         ]);
-        printf('Created Cloud Firestore client with project ID: %s' . PHP_EOL, $projectId);
+    }
+
+    public function push($id, $username){
+        $db = new FirestoreClient(); 
+        $docRef = $db->collection('users')->document($id);
+        $snapshot = $docRef->snapshot();
+        $lastdate = FieldValue::serverTimestamp();
+        $doc = [
+            "username" => array($username),
+            "first_date" => array($lastdate),
+            "last_date" => array($lastdate)
+        ];
+        if ($snapshot->exists()){
+            $doc = $snapshot->data();
+            if(end($doc["username"]) == $username){
+                $doc["last_date"] = $lastdate;
+            }    
+            else {
+                $firstdate = FieldValue::serverTimestamp();
+                array_push($doc["username"], $username);
+                array_push($doc["first_date"], $firstdate);
+                array_push($doc["last_date"], $lastdate);
+            }
+        }
+        $db->collection('users')->document($id)->set($doc);
+    }
+    public function pull($id){
+        $db = new FirestoreClient(); 
+        $doc = $db->collection('users')->document($id)->snapshot()->data();
+        return $doc;
     }
 }
+
+
 ?>
