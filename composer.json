@@ -1,0 +1,7 @@
+{
+    "require": {
+        "grpc/grpc": "^1.38",
+        "google/protobuf": "^3.17",
+        "google/cloud-firestore": "^1.34"
+    }
+}

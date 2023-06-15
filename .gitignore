@@ -1,1 +1,5 @@
+# Composer files
+composer.phar
+vendor/
+# media
 Overtime.mp3
