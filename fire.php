@@ -4,6 +4,8 @@ use Google\Cloud\Firestore\FieldValue;
 
 require_once "vendor/autoload.php";
 
+putenv("GOOGLE_APPLICATION_CREDENTIALS=" . __DIR__ . '/fire-key.json');
+
 function setup_client_create(string $projectId = null)
 {
     // Create the Cloud Firestore client
@@ -18,7 +20,7 @@ function setup_client_create(string $projectId = null)
             'credentials' => json_decode(file_get_contents('fire-key.json'), true),
             'projectId' => $projectId,
         ]);
-        printf('Created Cloud Firestore client with project ID: %s' . PHP_EOL, $projectId);
+        //printf('Created Cloud Firestore client with project ID: %s' . PHP_EOL, $projectId);
     }
 }
 setup_client_create("mal-user2id");
