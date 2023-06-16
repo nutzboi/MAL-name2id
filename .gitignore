@@ -3,3 +3,4 @@ composer.phar
 vendor/
 # media
 Overtime.mp3
+*key.json

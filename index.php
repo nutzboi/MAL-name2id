@@ -2,119 +2,97 @@
 <html>
 
 <head>
-<title>MAL User2ID</title>
-<link rel="stylesheet" href="style.css" />
+    <title>MAL User2ID</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
 
 <body bgcolor="hotpink">
-<center>
-<h1>MAL User2ID</h1>
-<form action="index.php" method="POST">
-<div class="gridof4">
-<input type="text" id="id" name="id" placeholder="ID">
-<input type="text" id="username" name="username" placeholder="Username">
-<button type="submit" name="getUser" value="clicked">get username</button>
-<button type="submit" name="getID" value="clicked">get ID</button>
-<p id="down">
-    
-<?php
+    <center>
+        <h1 style="margin-bottom: 1pt;">MAL User2ID</h1>
+        <p style="margin-top: 0pt; font-size: 120%; margin-bottom: 2em;"><i>(essentially MAL-Stalker)</i></p>
+        <form action="index.php" method="POST">
+            <div class="gridof4">
+                <input type="text" id="id" name="id" placeholder="ID">
+                <input type="text" id="username" name="username" placeholder="Username">
+                <button type="submit" name="getUser" value="clicked">get username</button>
+                <button type="submit" name="getID" value="clicked">get ID</button>
+                <p id="down">
+                <?php
+                    require "fire.php";
 
-require_once "vendor/autoload.php";
-require "fire.php";
+                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                        $down = 0;
+                        if (isset($_POST["getID"])) {
+                            echo "</p><p>";
+                            $username = $_POST["username"];
+                            if (empty($username)) {
+                                echo "You did not specify a username.";
+                            } else {
+                                $ch = curl_init();
+                                curl_setopt($ch, CURLOPT_URL, "https://myanimelist.net/profile/" . $username);
+                                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                                $response = curl_exec($ch);
+                                $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                                if ($status_code == 404) {
+                                    echo "Username does not exist in current MAL database.";
+                                } else if ($status_code == 200) {
+                                    $startpos = strpos($response, "https://myanimelist.net/modules.php?go=report&amp;type=profile&amp;id=");
+                                    $endpos = strpos($response, "\"", $startpos);
+                                    $id = substr($response, $startpos + 70, $endpos - $startpos - 70);
+                                    echo "<b><i>" . $username . "</i></b>'s ID is " . $id . ".";
+                                    echo "</p>";
+                                    push($id, $username);
+                                    $doc = pull($id);
+                                    print_table($doc);
+                                } else {
+                                    echo "MAL is down.";
+                                    $down = 1;
+                                    echo "</p>";
+                                }
+                                if ($down == 1) {
+                                    echo "<audio hidden=\"hidden\" src=\"Overtime.mp3\" />";
+                                }
+                                curl_close($ch);
+                            }
 
-use Firestore;
-$db = new Firestore(); 
-
-function print_table($doc){
-    echo "<div></div>";
-    for($i = 0; $i < count($doc["username"]); $i++){
-        echo "<div class=\"table\"><p>Username</p><p>First Seen</p><p>Last Seen</p>";
-        echo "<p>" . $doc["username"][$i] . "</p>" .
-        "<p>" . date("Y-m-d",$doc["first_date"][$i]) . "</p>" .
-        "<p>" . date("Y-m-d",$doc["last_date"][$i]) . "</p>";
-    }
-    echo "</div><br><div></div><p><i>All dates are expressed in ISO 8601 <b>(YYYY-MM-DD)</b> format.</p>";
-}
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $down = 0;
-    if(isset($_POST["getID"])){
-        echo "</p><p>";
-        $username = $_POST["username"];
-        if(empty($username)){
-           echo  "You did not specify a username.";
-        }
-        else{
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, "https://myanimelist.net/profile/" . $username);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $response = curl_exec($ch);
-            $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            if($status_code == 404){
-                echo "Username does not exist in current MAL database.";
-            }
-            else if($status_code == 200){
-                $startpos = strpos($response, "https://myanimelist.net/modules.php?go=report&amp;type=profile&amp;id=");
-                $endpos = strpos($response, "\"", $startpos);
-                $id = substr($response,$startpos+70,$endpos-$startpos-70);
-                echo "<b><i>" . $username . "</i></b>'s ID is " . $id . ".";
-                $db->push($id,$username);
-                $doc = $db->pull($id);
-                print_table($doc);
-            }
-            else{
-                echo "MAL is down.";
-                $down = 1;
-            }
-            echo "</p>";
-            if($down == 1){
-                echo "<audio hidden=\"hidden\" src=\"Overtime.mp3\" />";
-            }
-            curl_close($ch);
-        }
-
-    }
-    else if(isset($_POST['getUser'])){
-        $id = $_POST["id"];
-        if(empty($id)){
-           echo  "You did not specify a user ID.";
-        }
-        else{
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, "https://myanimelist.net/comtocom.php?id2=4163689&id1=" . $id);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $response = curl_exec($ch);
-            $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            if($status_code == 200){
-                $startpos = strpos($response, "Comments Between ");
-				if($startpos == 0){
-					if($id == 4163689){
-						echo "The user ID <i>" . $id . "</i> belongs to <b> LosAngeles </i></b>";
-					}
-					else{
-						echo "User ID does not exist in current MAL database.";
-					}
-				}
-				else{
-					$endpos = strpos($response, " ", $startpos+17);
-					$username = substr($response,$startpos+17,$endpos-$startpos-17);
-					echo "The user ID <i>" . $id . "</i> belongs to <b>" . $username . "</i></b>";
-                    $db->push($id,$username);
-                    $doc = $db->pull($id);
-                    print_table($doc);
-				}
-			}
-            else{
-                echo "MAL is down.";
-                $down = 1;
-            }
-            echo "</p>";
-        }
-    }
-}
-?>
-</div>
-</form>
-</center>
+                        } else if (isset($_POST['getUser'])) {
+                            $id = $_POST["id"];
+                            if (empty($id)) {
+                                echo "You did not specify a user ID.";
+                            } else {
+                                $ch = curl_init();
+                                curl_setopt($ch, CURLOPT_URL, "https://myanimelist.net/comtocom.php?id2=4163689&id1=" . $id);
+                                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                                $response = curl_exec($ch);
+                                $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                                if ($status_code == 200) {
+                                    $startpos = strpos($response, "Comments Between ");
+                                    if ($startpos == 0) {
+                                        if ($id == 4163689) {
+                                            echo "The user ID <i>" . $id . "</i> belongs to <b> LosAngeles </i></b>";
+                                        } else {
+                                            echo "User ID does not exist in current MAL database.";
+                                        }
+                                    } else {
+                                        $endpos = strpos($response, " ", $startpos + 17);
+                                        $username = substr($response, $startpos + 17, $endpos - $startpos - 17);
+                                        echo "The user ID <i>" . $id . "</i> belongs to <b>" . $username . "</i></b>";
+                                        push($id, $username);
+                                        $doc = pull($id);
+                                        print_table($doc);
+                                    }
+                                } else {
+                                    echo "MAL is down.";
+                                    $down = 1;
+                                }
+                                echo "</p>";
+                            }
+                        }
+                    }
+                    ?>
+            </div>
+        </form>
+    </center>
 </body>
+
 </html>

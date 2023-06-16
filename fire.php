@@ -2,47 +2,102 @@
 use Google\Cloud\Firestore\FirestoreClient;
 use Google\Cloud\Firestore\FieldValue;
 
-class Firestore
+require_once "vendor/autoload.php";
+
+function setup_client_create(string $projectId = null)
 {
-    private FirestoreClient $firestore;
-
-    public function __construct(){
-        $this->firestore = new FirestoreClient([
-            "keyFilePath" => "mal-user2id-88800c3331e7.json",
-            "projectId" => "mal-user2id"
+    // Create the Cloud Firestore client
+    if (empty($projectId)) {
+        // The `projectId` parameter is optional and represents which project the
+// client will act on behalf of. If not supplied, the client falls back to
+// the default project inferred from the environment.
+        $db = new FirestoreClient();
+        printf('Created Cloud Firestore client with default project ID.' . PHP_EOL);
+    } else {
+        $db = new FirestoreClient([
+            'credentials' => json_decode(file_get_contents('fire-key.json'), true),
+            'projectId' => $projectId,
         ]);
-    }
-
-    public function push($id, $username){
-        $db = new FirestoreClient(); 
-        $docRef = $db->collection('users')->document($id);
-        $snapshot = $docRef->snapshot();
-        $lastdate = FieldValue::serverTimestamp();
-        $doc = [
-            "username" => array($username),
-            "first_date" => array($lastdate),
-            "last_date" => array($lastdate)
-        ];
-        if ($snapshot->exists()){
-            $doc = $snapshot->data();
-            if(end($doc["username"]) == $username){
-                $doc["last_date"] = $lastdate;
-            }    
-            else {
-                $firstdate = FieldValue::serverTimestamp();
-                array_push($doc["username"], $username);
-                array_push($doc["first_date"], $firstdate);
-                array_push($doc["last_date"], $lastdate);
-            }
-        }
-        $db->collection('users')->document($id)->set($doc);
-    }
-    public function pull($id){
-        $db = new FirestoreClient(); 
-        $doc = $db->collection('users')->document($id)->snapshot()->data();
-        return $doc;
+        printf('Created Cloud Firestore client with project ID: %s' . PHP_EOL, $projectId);
     }
 }
+setup_client_create("mal-user2id");
 
+function push($id, $username)
+{
+    $db = new FirestoreClient([
+        'credentials' => json_decode(file_get_contents('fire-key.json'), true),
+        'projectId' => 'mal-user2id',
+    ]);
+    $docRef = $db->collection('users')->document($id);
+    $snapshot = $docRef->snapshot();
+    $lastdate = time();
+    $doc = [
+        "username" => array($username),
+        "first_date" => array(time()),
+        "last_date" => array(time())
+    ];
+    if ($snapshot->exists()) {
+        $doc = $snapshot->data();
+        if (end($doc["username"]) != $username) {
+            $firstdate = time();
+            array_push($doc["username"], $username);
+            array_push($doc["first_date"], $firstdate);
+            array_push($doc["last_date"], $lastdate);
+        }
+    }
+    $sub = $db->collection('users')->document($id);
+    if (!$snapshot->exists()) {
+        $sub->set(
+            [
+                "username" => $username,
+                "last_date" => $lastdate,
+                "first_date" => $lastdate,
+            ]
+        );
+    }
+    if (!$snapshot->exists() || !end($doc["username"]) == $username) {
+        $sub->update([
+            ['path' => 'username', 'value' => FieldValue::arrayUnion([$username])]
+        ]);
+        $sub->update([
+            ['path' => 'first_date', 'value' => FieldValue::arrayUnion([$lastdate])]
+        ]);
+        $sub->update([
+            ['path' => 'last_date', 'value' => FieldValue::arrayUnion([$lastdate])]
+        ]);
+    } else {
+        $sub->update([
+            ['path' => 'last_date', 'value' => FieldValue::arrayRemove([end($doc["last_date"])])]
+        ]);
+        $sub->update([
+            ['path' => 'last_date', 'value' => FieldValue::arrayUnion([$lastdate])]
+        ]);
+    }
+}
+function pull($id)
+{
+    $db = new FirestoreClient([
+        'projectId' => 'mal-user2id',
+        'credentials' => json_decode(file_get_contents('fire-key.json'), true),
+    ]);
+    $doc = $db->collection('users')->document($id)->snapshot()->data();
+    return $doc;
+}
 
+function print_table($doc)
+{
+    echo "<div></div>";
+    for ($i = 0; $i < count($doc["username"]); $i++) {
+        echo "<div class=\"table\">
+    <p>Username</p>
+    <p>First Seen</p>
+    <p>Last Seen</p>";
+        echo "<p>" . $doc["username"][$i] . "</p> " .
+            "<p>" . date("Y-m-d", $doc["first_date"][$i]) . "</p> " .
+            "<p>" . date("Y-m-d", $doc["last_date"][$i]) . "</p> ";
+    }
+    echo "</div><br>
+    <p><i>All dates are expressed in ISO 8601 <b>(YYYY-MM-DD)</b> format.</i></p>";
+}
 ?>
