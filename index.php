@@ -4,11 +4,18 @@
 <head>
     <title>MAL User2ID</title>
     <link rel="stylesheet" href="style.css" />
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<meta name="description" content="MAL-Stalker">
+	<meta name="keywords" content="MAL, MyAnimeList, Username, ID, User-ID">
+	<meta property="og:title" content="MAL-Stalker">
+	<meta property="og:description" content="Tool to convert usernames to IDs and track username changes on MyAnimeList.net">
+	<meta property="og:image" content="/favicon.png" />
+	<meta name="twitter:card" content="summary">
 </head>
 
 <body bgcolor="hotpink">
     <center>
-        <h1 style="margin-bottom: 1pt;">MAL User2ID</h1>
+        <h1 style="margin-bottom: 1pt;">MAL User2ID<sup><a href="about.htm">?</a></sup></h1>
         <p style="margin-top: 0pt; font-size: 120%; margin-bottom: 2em;"><i>(essentially MAL-Stalker)</i></p>
         <form action="index.php" method="POST">
             <div class="gridof4">
@@ -76,7 +83,7 @@
                                     } else {
                                         $endpos = strpos($response, " ", $startpos + 17);
                                         $username = substr($response, $startpos + 17, $endpos - $startpos - 17);
-                                        echo "The user ID <i>" . $id . "</i> belongs to <b>" . $username . "</i></b>";
+                                        echo "The user ID <i>" . $id . "</i> belongs to <b><a href=\"https://myanimelist.net/profile/$username\">$username</a></b>";
                                         push($id, $username);
                                         $doc = pull($id);
                                         print_table($doc);
