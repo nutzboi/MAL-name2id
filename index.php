@@ -17,12 +17,15 @@
     <center>
         <h1 style="margin-bottom: 1pt;">MAL User2ID<sup><a href="about.htm">?</a></sup></h1>
         <p style="margin-top: 0pt; font-size: 120%; margin-bottom: 2em;"><i>(essentially MAL-Stalker)</i></p>
-        <form action="index.php" method="POST">
-            <div class="gridof4">
+        <div class="centerdiv">
+            <form action="index.php" method="POST" class="gridof2">
                 <input type="text" id="id" name="id" placeholder="ID">
-                <input type="text" id="username" name="username" placeholder="Username">
                 <button type="submit" name="getUser" value="clicked">get username</button>
-                <button type="submit" name="getID" value="clicked">get ID</button>
+            </form>
+                <form action="index.php" method="POST" class="gridof2">
+                    <input type="text" id="username" name="username" placeholder="Username">
+                    <button type="submit" name="getID" value="clicked">get ID</button>
+                </form>
                 <p id="down">
                 <?php
                     require "fire.php";
@@ -98,7 +101,6 @@
                     }
                     ?>
             </div>
-        </form>
     </center>
 </body>
 
