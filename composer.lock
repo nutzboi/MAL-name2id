@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "617cdc9788c7015bde051c8a2f0441e3",
+    "content-hash": "642c61dab1ad29b03ed0c623ad3d8705",
     "packages": [
         {
             "name": "bensontrent/firestore-php",
@@ -308,22 +308,22 @@
         },
         {
             "name": "google/cloud-firestore",
-            "version": "v1.34.0",
+            "version": "v1.37.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-cloud-php-firestore.git",
-                "reference": "b59279f5daef432bbdd89701a28410ef56983d4f"
+                "reference": "225b40ac88b1a880df4445b83c98b656fa881c36"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-cloud-php-firestore/zipball/b59279f5daef432bbdd89701a28410ef56983d4f",
-                "reference": "b59279f5daef432bbdd89701a28410ef56983d4f",
+                "url": "https://api.github.com/repos/googleapis/google-cloud-php-firestore/zipball/225b40ac88b1a880df4445b83c98b656fa881c36",
+                "reference": "225b40ac88b1a880df4445b83c98b656fa881c36",
                 "shasum": ""
             },
             "require": {
                 "ext-grpc": "*",
                 "google/cloud-core": "^1.49.4",
-                "google/gax": "^1.1",
+                "google/gax": "^1.19.1",
                 "php": ">=7.4",
                 "ramsey/uuid": "^3.0|^4.0"
             },
@@ -358,9 +358,9 @@
             ],
             "description": "Cloud Firestore Client for PHP",
             "support": {
-                "source": "https://github.com/googleapis/google-cloud-php-firestore/tree/v1.34.0"
+                "source": "https://github.com/googleapis/google-cloud-php-firestore/tree/v1.37.3"
             },
-            "time": "2023-06-02T23:56:27+00:00"
+            "time": "2023-10-06T21:49:26+00:00"
         },
         {
             "name": "google/common-protos",
@@ -1690,5 +1690,5 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
