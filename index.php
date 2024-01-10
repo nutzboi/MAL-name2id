@@ -35,6 +35,7 @@
                         if (isset($_POST["getID"])) {
                             echo "</p><p>";
                             $username = $_POST["username"];
+							$username = trim($username);
                             if (empty($username)) {
                                 echo "You did not specify a username.";
                             } else {
@@ -67,8 +68,12 @@
 
                         } else if (isset($_POST['getUser'])) {
                             $id = $_POST["id"];
+							$id = trim($id);
                             if (empty($id)) {
                                 echo "You did not specify a user ID.";
+							}
+							else if(!is_numeric($id)){
+								echo "Invalid ID, must be a number.";
                             } else {
                                 $ch = curl_init();
                                 curl_setopt($ch, CURLOPT_URL, "https://myanimelist.net/comtocom.php?id2=4163689&id1=" . $id);
