@@ -58,7 +58,8 @@ function push($id, $username)
             ]
         );
     }
-    if (!$snapshot->exists() || !end($doc["username"]) == $username) {
+	$subdata = $sub->snapshot()->data();
+    if (!$snapshot->exists() || ($snapshot->exists() && end($subdata["username"]) != $username)) {
         $sub->update([
             ['path' => 'username', 'value' => FieldValue::arrayUnion([$username])]
         ]);
@@ -91,11 +92,11 @@ function pull($id)
 function print_table($doc)
 {
     echo "<div></div>";
-    for ($i = 0; $i < count($doc["username"]); $i++) {
-        echo "<div class=\"table\">
+	echo "<div class=\"table\">
     <p>Username</p>
     <p>First Seen</p>
     <p>Last Seen</p>";
+    for ($i = 0; $i < count($doc["username"]); $i++) {
         echo "<p>" . $doc["username"][$i] . "</p> " .
             "<p>" . date("Y-m-d", $doc["first_date"][$i]) . "</p> " .
             "<p>" . date("Y-m-d", $doc["last_date"][$i]) . "</p> ";
