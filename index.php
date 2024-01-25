@@ -106,6 +106,25 @@
                     }
                     ?>
             </div>
+            <form action="index.php" method="POST">
+                <label>Get IDs of users who were seen with the username:</label>
+                <br/>
+                <input type="text" id="username" name="username" placeholder="Username">
+                <button type="submit" name="dig" value="clicked">Get IDs</button>
+            </form>
+            <p><?php
+            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                if(isset($_POST["dig"])){
+                    $username = $_POST["username"];
+                    if(empty($username)){
+                        echo "You did not specify a username.";
+                    }
+                    else{
+                        print_r(dig_records($username));
+                    }
+                }
+            }
+            ?>
     </center>
 </body>
 

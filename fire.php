@@ -77,7 +77,26 @@ function push($id, $username)
             ['path' => 'last_date', 'value' => FieldValue::arrayUnion([$lastdate])]
         ]);
     }
+    
+    $snapshot = $db->collection('username_records')->document($username)->snapshot();
+    // $snapshot = $docRef;
+    if ($snapshot->exists()) {
+        $doc = $snapshot->data();
+        $sub = $db->collection('username_records')->document($username);
+        if(!in_array($id, $doc["id"])) {
+            $sub->update([
+                ['path' => 'id', 'value' => FieldValue::arrayUnion([$id])]
+            ]);
+        }
+    }
+    else{
+        $sub = $db->collection('username_records')->document($username);
+        $sub->set([
+            "id" => [$id],
+        ]);
+    }
 }
+
 function pull($id)
 {
     $db = new FirestoreClient([
@@ -102,5 +121,14 @@ function print_table($doc)
     }
     echo "</div><br>
     <p><i>All dates are expressed in ISO 8601 <b>(YYYY-MM-DD)</b> format.</i></p>";
+}
+
+function dig_records($username){
+    $db = new FirestoreClient([
+        'projectId' => 'mal-user2id',
+        'credentials' => json_decode(file_get_contents('fire-key.json'), true),
+    ]);
+    $doc = $db->collection('username_records')->document($username)->snapshot()->data();
+    return $doc["id"];
 }
 ?>
