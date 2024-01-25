@@ -77,6 +77,24 @@ function push($id, $username)
             ['path' => 'last_date', 'value' => FieldValue::arrayUnion([$lastdate])]
         ]);
     }
+    
+    $snapshot = $db->collection('username_records')->document($username)->snapshot();
+    // $snapshot = $docRef;
+    // if ($snapshot->exists()) {
+    //     $doc = $snapshot->data();
+    //     $sub = $db->collection('username_records')->document($username);
+    //     if(!in_array($id, $doc["id"])) {
+    //         $sub->update([
+    //             ['path' => 'id', 'value' => FieldValue::arrayUnion([$id])]
+    //         ]);
+    //     }
+    // }
+    // else{
+    //     $sub = $db->collection('username_records')->document($username);
+    //     $sub->update([
+    //         ['path' => 'id', 'value' => FieldValue::arrayUnion([$id])]
+    //     ]);
+    // }
 }
 
 function pull($id)
