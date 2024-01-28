@@ -5,6 +5,7 @@ use Google\Cloud\Firestore\FieldValue;
 require_once "vendor/autoload.php";
 
 putenv("GOOGLE_APPLICATION_CREDENTIALS=" . __DIR__ . '/fire-key.json');
+$projectId = "mal-user2id";
 
 function setup_client_create(string $projectId = null)
 {
@@ -23,13 +24,15 @@ function setup_client_create(string $projectId = null)
         //printf('Created Cloud Firestore client with project ID: %s' . PHP_EOL, $projectId);
     }
 }
-setup_client_create("mal-user2id");
+
+setup_client_create($projectId);
 
 function push($id, $username)
 {
+    global $projectId;
     $db = new FirestoreClient([
         'credentials' => json_decode(file_get_contents('fire-key.json'), true),
-        'projectId' => 'mal-user2id',
+        'projectId' => $projectId,
     ]);
     $docRef = $db->collection('users')->document($id);
     $snapshot = $docRef->snapshot();
@@ -77,7 +80,7 @@ function push($id, $username)
             ['path' => 'last_date', 'value' => FieldValue::arrayUnion([$lastdate])]
         ]);
     }
-    
+    $username = strtolower($username);
     $snapshot = $db->collection('username_records')->document($username)->snapshot();
     // $snapshot = $docRef;
     if ($snapshot->exists()) {
@@ -99,8 +102,9 @@ function push($id, $username)
 
 function pull($id)
 {
+    global $projectId;
     $db = new FirestoreClient([
-        'projectId' => 'mal-user2id',
+        'projectId' => $projectId,
         'credentials' => json_decode(file_get_contents('fire-key.json'), true),
     ]);
     $doc = $db->collection('users')->document($id)->snapshot()->data();
@@ -124,11 +128,12 @@ function print_table($doc)
 }
 
 function dig_records($username){
+    global $projectId;
     $db = new FirestoreClient([
-        'projectId' => 'mal-user2id',
+        'projectId' => $projectId,
         'credentials' => json_decode(file_get_contents('fire-key.json'), true),
     ]);
+    $username = strtolower($username);
     $doc = $db->collection('username_records')->document($username)->snapshot()->data();
     return $doc["id"];
 }
-?>

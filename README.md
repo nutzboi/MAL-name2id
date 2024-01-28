@@ -16,7 +16,7 @@ The purpose of this project is to make converting MAL usernames to unique user I
 2. Place project files in any directory your webserver can serve.
 3. Create a Cloud Firestore database with collection "users".
 4. [Create a service account](https://cloud.google.com/iam/docs/service-accounts-create) from the Google IAM Console and give it "Editor" role.
-5. Update all instances of ``"mal-user2id"`` in ``fire.php`` to your own firebase project name.
+5. Change the value of the global ``$projectID`` in ``fire.php`` to your own firebase project name.
 6. Create a key for your service account and place it in the project directory as "fire-key.json"
 
 ***Attention:** Make sure to deny public access to the API key in your webserver configuration.*
