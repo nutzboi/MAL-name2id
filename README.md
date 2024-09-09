@@ -20,5 +20,3 @@ The purpose of this project is to make converting MAL usernames to unique user I
 6. Create a key for your service account and place it in the project directory as "fire-key.json"
 
 ***Attention:** Make sure to deny public access to the API key in your webserver configuration.*
-
-<u>Still WIP btw.</u>
