@@ -19,3 +19,8 @@ body {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
 }
+
+p{
+	padding-left:5pt;
+	padding-right:5pt;
+}
