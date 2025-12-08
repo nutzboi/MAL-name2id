@@ -1,0 +1,2 @@
+CREATE TABLE users (id INT PRIMARY KEY , jdoc JSON NOT NULL) ENGINE = InnoDB;
+CREATE TABLE username_records(username VARCHAR(17) PRIMARY KEY, records JSON NOT NULL) ENGINE = InnoDB;

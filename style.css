@@ -1,11 +1,26 @@
-body{
+body {
 	margin-top: 2em;
 	text-align: center;
 }
-.gridof4{
+
+.gridof2 {
 	display: grid;
-	grid-template-columns: repeat(2, 1fr);
+	grid-template-columns: repeat(1, 1fr);
+}
+
+.centerdiv {
+	display: grid;
 	width: 33%;
-	height: 50%
-	
+	height: 50%;
+	grid-template-columns: repeat(2, 1fr);
+}
+
+.table {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+}
+
+p{
+	padding-left:5pt;
+	padding-right:5pt;
 }
