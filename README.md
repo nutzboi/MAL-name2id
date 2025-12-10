@@ -1,5 +1,5 @@
 # mal-name2id (MAL-Stalker)
-Log MyAnimeList username changes. Made with PHP and Google Firebase.
+Log MyAnimeList username changes. Made with PHP and MySQL.
 
 The purpose of this project is to make converting MAL usernames to unique user IDs easier (and vice versa) as well as finding MAL profiles from old usernames, especially those of who often change their usernames.
 
