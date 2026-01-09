@@ -42,13 +42,25 @@ function getUser($id, $echo = false)
     }
     return $username;
 }
+
+function validateUser($username, $echo = false){
+	if(!(preg_match("/[\w,-]{2,16}/", $username, $matches) && $matches[0] == $username)){
+		if($echo)
+			echo "Username must be between 2 and 16 characters; and contain only letters, " .
+				"digits, underscores and hyphens." ;
+		return false;
+	}
+	return true;
+}
+
 function getID($username, $echo = false)
 {
 	$username = trim($username);
     $id = 0;
     if (empty($username) && $echo) {
         echo "You did not specify a username.";
-    } else {
+    }
+	else if (validateUser($username, $echo)) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://myanimelist.net/profile/" . $username);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
