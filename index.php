@@ -59,13 +59,19 @@
                     else{
                         $rec = dig_records($username);
                         if($rec == null){
-                            print("No records.");
+                            print("No records.<br>" .
+                                "Check if <a href=\"?wayback&u=". $username .
+                                "\">Wayback Machine (latest)</a> knows?");
                         }
                         else{
                             print_r($rec);
                         }
                     }
                 }
+            }
+            else if(isset($_GET["wayback"])){
+                $username = $_GET["u"];
+                getIDWayback($username, true);
             }
             ?>
             </p>
