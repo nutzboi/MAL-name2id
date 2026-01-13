@@ -21,23 +21,31 @@ function getUser($id, $echo = false)
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($ch);
         $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $success = 0;
         if ($status_code == 200) {
             $startpos = strpos($response, "Comments Between ");
             if ($startpos == 0 && $echo) {
                 echo "User ID does not exist in current MAL database.";
-                return "";
             } else {
+                $success = 1;
                 $endpos = strpos($response, " ", $startpos + 17);
                 $username = substr($response, $startpos + 17, $endpos - $startpos - 17);
                 push($id, $username);
-                $doc = pull($id);
                 if($echo){
                     echo "The user ID <i>" . $id . "</i> belongs to <b><a href=\"https://myanimelist.net/profile/$username\">$username</a></b>";
-                    print_table($doc);
                 }
             }
         } else if($echo){
             down();
+        }
+        
+        if($echo){
+            $doc = pull($id);
+            if(!empty($doc)){
+                if(!$success)
+                    echo "<div></div><p>Though, user is present in the stalker database:</p><br><div></div>";
+                print_table($doc);
+            }
         }
     }
     return $username;
