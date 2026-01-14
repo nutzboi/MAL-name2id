@@ -76,6 +76,9 @@ function getIDWayback($username, $echo = false){
         else if($response["archived_snapshots"]["closest"]["status"] != "200" && $echo){
             echo "Latest Wayback snapshot is not 200 OK.";
         }
+        else if($status_code == 429){
+            echo "Stalker rate-limited by Wayback Machine.";
+        }
         else{
             $url = $response["archived_snapshots"]["closest"]["url"];
             $time = (string)$response["archived_snapshots"]["closest"]["timestamp"];
