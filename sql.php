@@ -122,7 +122,7 @@ function pushWayback($id, $username, $time){
 					if($r[2] == "first_date" && $l[2] == $r[2]){
 						$inspos = $r[0]; 
 					}
-					else if($l[2] == "last_date" && $l[2] == r[2]){
+					else if($l[2] == "last_date" && $l[2] == $r[2]){
 						$inspos = $l[0]+1;
 					}
 					else if($l[2] == "first_date" && $r[2] == "last_date"){
@@ -138,11 +138,11 @@ function pushWayback($id, $username, $time){
 				}
 			}
 			else if($l[0] < $r[0]){
-				if($username == $doc["username"][l[0]]){
+				if($username == $doc["username"][$l[0]]){
 					$instype = "extend";
 					$inspos = $r[0];
 				}
-				else if($username == $doc["username"][r[0]]){
+				else if($username == $doc["username"][$r[0]]){
 					$instype = "extend";
 					$inspos = $l[0];
 				}
