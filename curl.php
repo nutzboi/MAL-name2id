@@ -96,7 +96,8 @@ function getIDWayback($username, $echo = false){
                 
                 $startpos = strpos($response, "<title>"); // extract username from page title.
                 $endpos = strpos($response, "&", $startpos);  // look for a terminating &#039; or &apos;
-                if($endpos === false) $endpos = strpos($response, "'", $startpos); // with fallback to '
+                $endpos2 = strpos($response, "'", $startpos); // with fallback to '
+                if($endpos === false || $endpos > $endpos2) $endpos = $endpos2;
                 $username = substr($response, $startpos + 7, $endpos - $startpos - 7);
                 $username = trim($username);
                 pushWayback($id, $username, $time);
