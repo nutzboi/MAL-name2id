@@ -19,7 +19,7 @@
         <p style="margin-top: 0pt; font-size: 120%; margin-bottom: 2em;"><i>(essentially MAL-Stalker)</i></p>
         <div class="centerdiv">
             <form action="index.php" method="POST" class="gridof2">
-                <input type="text" id="id" name="id" placeholder="ID">
+                <input type="text" inputmode="numeric" pattern="\s*\d*\s*" id="id" name="id" placeholder="ID (number)">
                 <button type="submit" name="getUser" value="clicked">get username</button>
             </form>
                 <form action="index.php" method="POST" class="gridof2">
@@ -59,13 +59,19 @@
                     else{
                         $rec = dig_records($username);
                         if($rec == null){
-                            print("No records.");
+                            print("No records.<br>" .
+                                "Check if <a href=\"?wayback&u=". $username .
+                                "\">Wayback Machine (latest)</a> knows?");
                         }
                         else{
                             print_r($rec);
                         }
                     }
                 }
+            }
+            else if(isset($_GET["wayback"])){
+                $username = $_GET["u"];
+                getIDWayback($username, true);
             }
             ?>
             </p>
