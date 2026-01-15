@@ -185,26 +185,27 @@ function pushWayback($id, $username, $time){
 		$stmt = $conn->prepare("UPDATE users SET jdoc = ? WHERE id = ? ");
 		$stmt-> bind_param("si", $jdoc, $id);
 		$stmt->execute();
-		
-		$records = dig_records($username);
-		if($records == null){
-			$stmt = $conn->prepare("INSERT INTO username_records (username, records) VALUES (?, ?)");
-			$records = "[\"{$id}\"]";
-			$stmt->bind_param("ss", $username, $records);
-			$stmt->execute();
-		}
-		else{
-			if(!in_array($id, $records)){
-				array_push($records, $id);
-				$records = json_encode($records);
-				$stmt = $conn->prepare("UPDATE username_records SET records = ? WHERE username = ?");
-				$stmt->bind_param("ss", $records, $username);
-				$stmt->execute();
-			}
-		}
 		/* end execution */
-		return;
 	}
+    
+    $records = dig_records($username);
+    if($records == null){
+        $stmt = $conn->prepare("INSERT INTO username_records (username, records) VALUES (?, ?)");
+        $records = "[\"{$id}\"]";
+        $stmt->bind_param("ss", $username, $records);
+        $stmt->execute();
+    }
+    else{
+        if(!in_array($id, $records)){
+            array_push($records, $id);
+            $records = json_encode($records);
+            $stmt = $conn->prepare("UPDATE username_records SET records = ? WHERE username = ?");
+            $stmt->bind_param("ss", $records, $username);
+            $stmt->execute();
+        }
+    }
+    
+    return;
 }
 
 function print_table($doc)
