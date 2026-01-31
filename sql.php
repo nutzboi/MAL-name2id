@@ -6,14 +6,19 @@ $conn = new mysqli(dbhost, dbuser, dbpass, dbname);
 
 function pull($id){
 	global $conn;
-	$stmt = $conn->prepare("SELECT jdoc FROM users WHERE id = ?");
+	$stmt = $conn->prepare("SELECT * FROM records WHERE id = ? ORDER BY first_date");
 	$stmt->bind_param("i", $id);
 	$stmt->execute();
 	$result = $stmt->get_result();
 	if($result->num_rows < 1) return [];
 	else{
-		$jdoc = $result->fetch_assoc()["jdoc"];
-		return json_decode($jdoc, true);
+		$doc = [];
+		foreach($result->fetch_assoc() as $row){
+			foreach(array_keys($row) as $key){
+				array_push($doc[$key], $row[$key]);
+			}
+		}
+		return $doc;
 	}
 }
 
@@ -22,44 +27,21 @@ function push($id, $username){
 	$doc = pull($id);
 	$lastdate = time();
 	if(empty($doc)){
-		$jdoc = json_encode([
-			"username" => array($username),
-			"first_date" => array(time()),
-			"last_date" => array(time())
-			]);
-		$stmt = $conn->prepare("INSERT INTO users (id, jdoc) VALUES (?, ?)");
-		$stmt-> bind_param("is", $id, $jdoc);
+		$stmt = $conn->prepare("INSERT INTO records VALUES (?, ?, ?, ?)");
+		$stmt-> bind_param("iiis", $id, $lastdate, $lastdate, $username);
 		$stmt->execute();
 	}
 	else{
 		if(end($doc["username"]) != $username) {
-            $firstdate = time();
-            array_push($doc["username"], $username);
-            array_push($doc["first_date"], $firstdate);
-            array_push($doc["last_date"], $lastdate);
-        }
-		else{
-			$doc["last_date"][count($doc["last_date"])-1] = $lastdate;
+			$stmt = $conn->prepare("INSERT INTO records VALUES (?, ?, ?, ?)");
+			$stmt-> bind_param("iiis", $id, $lastdate, $lastdate, $username);
+			$stmt->execute();
 		}
-		$jdoc = json_encode($doc);
-		$stmt = $conn->prepare("UPDATE users SET jdoc = ? WHERE id = ? ");
-		$stmt-> bind_param("si", $jdoc, $id);
-		$stmt->execute();
-	}
-	
-	$records = dig_records($username);
-	if($records == null){
-		$stmt = $conn->prepare("INSERT INTO username_records (username, records) VALUES (?, ?)");
-		$records = "[{$id}]";
-		$stmt->bind_param("ss", $username, $records);
-		$stmt->execute();
-	}
-	else{
-		if(!in_array($id, $records)){
-			array_push($records, $id);
-			$records = json_encode($records);
-			$stmt = $conn->prepare("UPDATE username_records SET records = ? WHERE username = ?");
-			$stmt->bind_param("ss", $records, $username);
+		else{
+			$tomodify = end($doc["first_date"]);
+			$stmt = $conn->prepare("UPDATE records SET last_date = ?
+									WHERE id = ? AND first_date = ?");
+			$stmt-> bind_param("iii", $lastdate, $id, $tomodify);
 			$stmt->execute();
 		}
 	}
@@ -70,13 +52,8 @@ function pushWayback($id, $username, $time){
 	global $conn;
 	$doc = pull($id);
 	if(empty($doc)){
-		$jdoc = json_encode([
-			"username" => array($username),
-			"first_date" => array($time),
-			"last_date" => array($time)
-			]);
-		$stmt = $conn->prepare("INSERT INTO users (id, jdoc) VALUES (?, ?)");
-		$stmt-> bind_param("is", $id, $jdoc);
+		$stmt = $conn->prepare("INSERT INTO records VALUES (?, ?, ?, ?)");
+		$stmt-> bind_param("iiis", $id, $time, $time, $username);
 		$stmt->execute();
 	}
 	else{
@@ -163,47 +140,46 @@ function pushWayback($id, $username, $time){
 		if($instype == "split"){
 			$firstdate = $doc["first_date"][$inspos];
 			$lastdate = $doc["last_date"][$inspos];
-			$doc["last_date"][$inspos] = $firstdate;
-			$newuser = [$username, $doc["username"][$inspos]];
-			$newtime = [$time, $lastdate];
-			$inspos++;
-			array_splice($doc["username"], $inspos, 0, $newuser);
-			array_splice($doc["first_date"], $inspos, 0, $newtime);
-			array_splice($doc["last_date"], $inspos, 0, $newtime);
+			// $doc["last_date"][$inspos] = $firstdate;
+			
+			$tomodify = $doc["first_date"][$inspos];
+			$stmt = $conn->prepare("UPDATE records SET last_date = ?
+									WHERE id = ? AND first_date = ?");
+			$stmt-> bind_param("iii", $firstdate, $id, $tomodify);
+			$stmt->execute();
+			
+			// $newuser = [$username, $doc["username"][$inspos]];
+			// $newtime = [$time, $lastdate];
+			
+			$stmt = $conn->prepare("INSERT INTO records VALUES(?, ?, ?, ?)");
+			$stmt-> bind_param("iiis", $id, $time, $time, $username);
+			$stmt->execute();
+			
+			$stmt = $conn->prepare("INSERT INTO records VALUES(?, ?, ?, ?)");
+			$stmt-> bind_param("iiis", $id, $lastdate, $lastdate, $doc["username"][$inspos]);
+			$stmt->execute();
+			
+			// $inspos++;
+			// array_splice($doc["username"], $inspos, 0, $newuser);
+			// array_splice($doc["first_date"], $inspos, 0, $newtime);
+			// array_splice($doc["last_date"], $inspos, 0, $newtime);
 		}
 		else if($instype == "extend"){
-			$doc["first_date"][$inspos] = min($doc["first_date"][$inspos], $time);
-			$doc["last_date"][$inspos] = max($doc["last_date"][$inspos], $time);
+			$firstdate = min($doc["first_date"][$inspos], $time);
+			$lastdate = max($doc["last_date"][$inspos], $time);
+			$tomodify = $doc["first_date"][$inspos];
+			$stmt = $conn->prepare("UPDATE records SET first_date = ?, last_date = ?
+									WHERE id = ? AND first_date = ?");
+			$stmt-> bind_param("iiii", $firstdate, $lastdate, $id, $tomodify);
+			$stmt->execute();
 		}
 		else if($instype == "insert"){
-			array_splice($doc["username"], $inspos, 0, $username);
-			array_splice($doc["first_date"], $inspos, 0, $time);
-			array_splice($doc["last_date"], $inspos, 0, $time);
+			$stmt = $conn->prepare("INSERT INTO records VALUES (?, ?, ?, ?)");
+			$stmt-> bind_param("iiis", $id, $time, $time, $username);
+			$stmt->execute();
 		}
-		
-		$jdoc = json_encode($doc);
-		$stmt = $conn->prepare("UPDATE users SET jdoc = ? WHERE id = ? ");
-		$stmt-> bind_param("si", $jdoc, $id);
-		$stmt->execute();
 		/* end execution */
 	}
-    
-    $records = dig_records($username);
-    if($records == null){
-        $stmt = $conn->prepare("INSERT INTO username_records (username, records) VALUES (?, ?)");
-        $records = "[\"{$id}\"]";
-        $stmt->bind_param("ss", $username, $records);
-        $stmt->execute();
-    }
-    else{
-        if(!in_array($id, $records)){
-            array_push($records, $id);
-            $records = json_encode($records);
-            $stmt = $conn->prepare("UPDATE username_records SET records = ? WHERE username = ?");
-            $stmt->bind_param("ss", $records, $username);
-            $stmt->execute();
-        }
-    }
     
     return;
 }
@@ -226,12 +202,14 @@ function print_table($doc)
 
 function dig_records($username){
 	global $conn;
-	$stmt = $conn->prepare("SELECT records FROM username_records WHERE username = ?");
+	$stmt = $conn->prepare("SELECT id FROM records WHERE username = ?");
 	$stmt->bind_param("s", $username);
 	$stmt->execute();
 	$result = $stmt->get_result();
 	if($result->num_rows < 1) return [];
-	else return json_decode($result->fetch_assoc()["records"], true);
+	else{
+		return $result->fetch_all();
+	}
 }
 
 /* if(isset($_GET["test"])){
